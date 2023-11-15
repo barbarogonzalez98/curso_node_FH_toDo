@@ -1,6 +1,9 @@
 const  inquirer  = require('inquirer');
+const Tarea = require('../models/tarea');
 require('colors');
 
+
+//Menu y Pausa
 const preguntas = [
     {
         type: 'list',
@@ -32,7 +35,6 @@ const preguntas = [
         ],
     }
 ]
-
 const inquirerMenu = async ()=>{
     console.clear();
     console.log('==============================='.green);
@@ -42,7 +44,6 @@ const inquirerMenu = async ()=>{
     const {option} = await inquirer.prompt(preguntas);
     return option;
 }
-
 const pausa = async () =>  {
     const question = [
         {
@@ -54,7 +55,7 @@ const pausa = async () =>  {
     console.log('\n');
      await inquirer.prompt(question);
  }
-
+//Entrar una nueva tarea
  const leerInput = async (message)=>{
     const question = [
         {
@@ -72,9 +73,83 @@ const pausa = async () =>  {
     const {desc} = await inquirer.prompt(question);
     return desc;
 }
+//Eliminar tarea y confirmar
+/**
+ * 
+ * @param {[Tarea]} listado 
+ */
+const eliminarTareaMenu = async listado=>{
+    const choices = listado. map((tarea, i)=>{
+        const index = `${i + 1}.`.green;
+        return {
+            value: tarea.id,
+            name: `${index} ${tarea.descripcion}`,
+        }
+    })
+    choices.unshift({
+        value: '0',
+        name: '0. '.green + 'Cancelar',
+    });
+    const preguntas = [
+        {
+            type: 'list',
+            name: 'option',
+            message: '¿Que tarea desea borrar?',
+            choices
+        }
+    ]
+    console.log('\n');
+    const {option} = await inquirer.prompt(preguntas);
+    return option;
+}
+const confirmar = async (message) =>  {
+    const question = [
+        {
+            type: 'confirm',
+            name: 'ok',
+            message,
+        }
+    ]
+    console.log('\n');
+     const {ok} = await inquirer.prompt(question);
+     return ok;
+ }
+//Marcar como completado 
+/**
+ * 
+ * @param {[Tarea]} listado 
+ */
+const marcarCompletadoMenu = async listado=>{
+    const choices = listado. map((tarea, i)=>{
+        const estado = (tarea.completadosEn)
+        ?'Completado'.green
+        :'Pendiente'.red;
+        const index = `${i + 1}.`.green;
+        return {
+            value: tarea.id,
+            name: `${index} ${tarea.descripcion} ${estado}`,
+            checked: (tarea.completadosEn)? true : false,
+        }
+    })
+    const preguntas = [
+        {
+            type: 'checkbox',
+            name: 'ids',
+            message: '¿Que tarea desea completar?',
+            choices
+        }
+    ]
+    console.log('\n');
+    const {ids} = await inquirer.prompt(preguntas);
+    return ids;
+}
+
 
 module.exports = {
     inquirerMenu,
     pausa,
     leerInput,
+    eliminarTareaMenu,
+    confirmar,
+    marcarCompletadoMenu,
 }
